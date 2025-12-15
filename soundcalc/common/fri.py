@@ -89,7 +89,7 @@ def get_FRI_proof_size_bits(
     # each leaf i for that root contains symbols i for all initial functions.
     n = int(domain_size)
     num_leafs = n
-    tuple_size = batch_size
+    tuple_size = 1
     size_bits += hash_size_bits + num_queries * get_size_of_merkle_path_bits(num_leafs, tuple_size, field_size_bits, hash_size_bits)
 
     # Now we have folded these batch_size initial functions into one
@@ -117,3 +117,17 @@ def get_FRI_proof_size_bits(
     size_bits += rate * n * field_size_bits
 
     return size_bits
+
+def get_lde_openings_size_bits(
+    hash_size_bits: int,
+    field_size_bits: int,
+    num_columns: int,
+    num_queries: int,
+    trace_length: int,
+) -> int:
+    num_leafs = trace_length
+    tuple_size = num_columns
+
+    return hash_size_bits + num_queries * get_size_of_merkle_path_bits(
+        num_leafs, tuple_size, field_size_bits, hash_size_bits
+    )

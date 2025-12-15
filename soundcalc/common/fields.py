@@ -109,6 +109,11 @@ FIELD_MAP = {
     "KoalaBear^4": KOALABEAR_4,
 }
 
+def field_base_element_size_bits(field: FieldParams) -> int:
+    """
+    Returns the size of a base field element in bits.
+    """
+    return math.ceil(math.log2(field.p))
 
 def parse_field(field_str: str) -> FieldParams:
     """

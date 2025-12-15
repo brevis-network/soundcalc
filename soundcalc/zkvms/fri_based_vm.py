@@ -12,8 +12,8 @@ from soundcalc.proxgaps.johnson_bound import JohnsonBoundRegime
 from soundcalc.proxgaps.proxgaps_regime import ProximityGapsRegime
 from soundcalc.proxgaps.unique_decoding import UniqueDecodingRegime
 from soundcalc.zkvms.zkvm import Circuit, zkVM
-from ..common.fields import FieldParams, parse_field
-from ..common.fri import get_FRI_proof_size_bits, get_num_FRI_folding_rounds
+from ..common.fields import FieldParams, parse_field, field_base_element_size_bits
+from ..common.fri import get_FRI_proof_size_bits, get_num_FRI_folding_rounds, get_lde_openings_size_bits
 
 
 def get_best_attack_security(field_size: float, rho: float, num_queries: int, grinding_query_phase: int) -> int:
@@ -226,7 +226,16 @@ class FRIBasedCircuit(Circuit):
         # proof size for every zkEVM we can think of
         # XXX (BW): we should probably also add something for the OOD samples and plookup, lookup etc.
 
-        return get_FRI_proof_size_bits(
+        base_field_bits = field_base_element_size_bits(self.field)
+        lde_bits = get_lde_openings_size_bits(
+            hash_size_bits=self.hash_size_bits,
+            field_size_bits=base_field_bits,
+            num_columns=self.num_columns,
+            num_queries=self.num_queries,
+            trace_length=self.trace_length,
+        )
+
+        fri_bits = get_FRI_proof_size_bits(
             hash_size_bits=self.hash_size_bits,
             field_size_bits=self.field.extension_field_element_size_bits(),
             batch_size=self.batch_size,
@@ -235,6 +244,7 @@ class FRIBasedCircuit(Circuit):
             folding_factors=self.FRI_folding_factors,
             rate=self.rho
         )
+        return lde_bits + fri_bits
 
     def get_security_levels(self) -> dict[str, dict[str, int]]:
         """
