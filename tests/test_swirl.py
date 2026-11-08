@@ -9,7 +9,7 @@ from soundcalc.circuits.swirl.calculator import (
     calculate_swirl_soundness,
 )
 from soundcalc.circuits.swirl.proof_size import get_swirl_proof_size_breakdown_bits
-from soundcalc.zkvms import openvm2, zkdtvm_v080
+from soundcalc.zkvms import openvm2, pico, zkdtvm_v080
 from soundcalc.zkvms.zkvm import zkVM
 
 
@@ -273,3 +273,13 @@ def test_swirl_proof_shape_inputs_are_validated(overrides, message):
     circuit = _load_section(_fixed_shape_section(**overrides))
     with pytest.raises(ValueError, match=message):
         circuit.get_proof_size_bits()
+
+
+def test_pico_final_proof_is_its_compress_proof_at_its_encoded_size():
+    circuits = pico.load().get_circuits()
+    final = circuits[-1]
+    assert final.get_name() == "compress"
+    assert final.get_proof_size_bits() == 299179 * 8
+    for circuit in circuits:
+        (levels,) = circuit.get_security_levels().values()
+        assert levels["total"] >= 128
