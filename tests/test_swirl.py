@@ -222,8 +222,8 @@ def test_swirl_proof_shape_inputs_price_a_fixed_shape_proof_exactly():
 @pytest.mark.parametrize(
     "key, value, deltas",
     [
-        # One more layer: its 4 claims and one more 3-coefficient sumcheck array
-        # in each of the 22 layers after the first.
+        # One more layer: its 4 claims and its sumcheck, 22 rounds of 3
+        # coefficients (layer i of the GKR proof has i rounds).
         ("proof_size_num_gkr_rounds", 23, {"gkr_bits": (4 + 22 * 3) * 160}),
         ("proof_size_num_column_openings", 1555, {"batch_constraint_bits": 160}),
         ("proof_size_num_opening_parts", 43, {"batch_constraint_bits": 32}),
@@ -236,7 +236,8 @@ def test_swirl_proof_shape_inputs_price_a_fixed_shape_proof_exactly():
 def test_swirl_proof_shape_inputs_each_price_their_own_part(key, value, deltas):
     base = _load_section(_fixed_shape_section()).get_proof_size_breakdown_bits()
     changed = _load_section(_fixed_shape_section(**{key: value})).get_proof_size_breakdown_bits()
-    for part in ("preamble_bits", "gkr_bits", "batch_constraint_bits", "stacking_bits", "whir_bits"):
+    parts = ("preamble_bits", "gkr_bits", "batch_constraint_bits", "stacking_bits", "whir_bits")
+    for part in parts:
         assert getattr(changed, part) - getattr(base, part) == deltas.get(part, 0), part
 
 
@@ -255,15 +256,24 @@ def test_swirl_gkr_rounds_default_to_zero_without_interactions():
 @pytest.mark.parametrize(
     "overrides, message",
     [
-        ({"proof_size_num_column_openings": 1408}, "column openings cannot be smaller than trace columns"),
-        ({"proof_size_num_column_openings": 2819}, "column openings cannot exceed two per trace column"),
+        (
+            {"proof_size_num_column_openings": 1408},
+            "column openings cannot be smaller than trace columns",
+        ),
+        (
+            {"proof_size_num_column_openings": 2819},
+            "column openings cannot exceed two per trace column",
+        ),
         ({"proof_size_num_opening_parts": 20}, "opening parts must cover every present AIR"),
         (
             {"proof_size_num_commitments": 0, "proof_size_num_opening_parts": None},
             "must have at least one commitment",
         ),
         ({"proof_size_num_cached_commitments": -1}, "cached commitments cannot be negative"),
-        ({"proof_size_num_cached_commitments": 2}, "cached commitments must leave one commitment for common main"),
+        (
+            {"proof_size_num_cached_commitments": 2},
+            "cached commitments must leave one commitment for common main",
+        ),
         ({"proof_size_num_gkr_rounds": -1}, "GKR rounds cannot be negative"),
         # The bound is l_skip + 23 = 27.
         ({"proof_size_num_gkr_rounds": 28}, "GKR rounds cannot exceed the n_logup bound"),

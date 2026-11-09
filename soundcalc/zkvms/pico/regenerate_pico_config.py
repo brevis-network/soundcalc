@@ -39,9 +39,17 @@ ORDER = ["riscv", "convert", "combine", "deferred", "embed", "compress"]
 ROLES = {
     "riscv": "proves one chunk of the RISC-V execution",
     "convert": "verifies one RISCV proof",
-    "combine": "verifies one or two CONVERT or COMBINE proofs and joins their execution, down to one root",
-    "deferred": "verifies the root proof of a program whose proof the guest verifies (a COMBINE-family circuit)",
-    "embed": "re-proves the COMPRESS proof under a BN254 Poseidon2 transcript, for the on-chain path (WRAP, Groth16)",
+    "combine": (
+        "verifies one or two CONVERT or COMBINE proofs and joins their execution, down to one root"
+    ),
+    "deferred": (
+        "verifies the root proof of a program whose proof the guest verifies"
+        " (a COMBINE-family circuit)"
+    ),
+    "embed": (
+        "re-proves the COMPRESS proof under a BN254 Poseidon2 transcript,"
+        " for the on-chain path (WRAP, Groth16)"
+    ),
     "compress": "re-proves the complete root at code rate 1/16 with list decoding: the final proof",
 }
 # Terms on which Pico's calculator is more conservative, by exactly this many bits.
@@ -154,7 +162,8 @@ def circuit_section(machine: str, key: dict, shapes: dict) -> list[str]:
     if whir["proximity"] == "UniqueDecoding":
         fields.append(("explicit_regime", "unique"))
     else:
-        fields += [("explicit_regime", "list"), ("explicit_m", whir["proximity"]["ListDecoding"]["m"])]
+        m = whir["proximity"]["ListDecoding"]["m"]
+        fields += [("explicit_regime", "list"), ("explicit_m", m)]
     fields += [
         ("whir_num_queries", [r["num_queries"] for r in whir["rounds"]]),
         ("constraint_degree", p["max_constraint_degree"]),

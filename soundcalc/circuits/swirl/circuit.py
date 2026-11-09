@@ -138,13 +138,13 @@ class SWIRLCircuit(Circuit):
         """The optional proof-shape inputs that are set, as entries of
         `PROOF_SHAPE_INPUTS` followed by the value."""
         return [
-            (key, field, label, getattr(self, key))
-            for key, field, label in PROOF_SHAPE_INPUTS
+            (key, name, label, getattr(self, key))
+            for key, name, label in PROOF_SHAPE_INPUTS
             if getattr(self, key) is not None
         ]
 
     def _proof_size_config(self) -> SWIRLProofSizeConfig:
-        shape = {field: value for _, field, _, value in self._proof_size_shape()}
+        shape = {name: value for _, name, _, value in self._proof_size_shape()}
         return SWIRLProofSizeConfig(
             params=self.params,
             field=self.field,

@@ -32,9 +32,10 @@ class SWIRLProofSizeConfig:
     num_trace_columns: int
     max_interactions_per_air: int
     num_public_values: int = 0
-    # Optional proof-shape fields, for a circuit whose proof shape is fixed.
-    # Unset, the next three take the bounds the key admits, and the two
-    # commitment counts take the OpenVM layout above.
+    # Optional proof-shape fields, for a circuit whose proof shapes are known:
+    # they give one proof's shape, such as the largest. Unset, the GKR depth and
+    # the column openings take their bounds, and the opening parts and the two
+    # commitment counts follow the OpenVM layout above.
     # LogUp-GKR layers, `l_skip + n_logup` (default: `l_skip` plus the
     # `n_logup` bound, or 0 without interactions).
     num_gkr_rounds: int | None = None
@@ -126,7 +127,9 @@ def _validate(config: SWIRLProofSizeConfig) -> None:
         raise ValueError("SWIRL proof-size cached commitments cannot be negative")
     # Common main is always one of the commitments (see `_preamble_bits`).
     if config.num_cached_commitments > config.num_commitments - 1:
-        raise ValueError("SWIRL proof-size cached commitments must leave one commitment for common main")
+        raise ValueError(
+            "SWIRL proof-size cached commitments must leave one commitment for common main"
+        )
 
     num_opening_parts = _num_opening_parts(config)
     num_column_openings = _num_column_openings(config)
